@@ -9,20 +9,34 @@ BASE_MODEL = "dmis-lab/biobert-v1.1"
 
 class MedVigilBrain:
     def __init__(self, model_path=MODEL_PATH):
+        # Detect GPU
+        self.device = 0 if torch.cuda.is_available() else -1
+        print(f"Using device: {'GPU' if self.device == 0 else 'CPU'}")
         if os.path.exists(model_path):
-            print(f"Loading custom MedVigil model from {model_path}...")
-            self.tokenizer = AutoTokenizer.from_pretrained(model_path)
-            self.model = AutoModelForTokenClassification.from_pretrained(model_path)
+            try:
+                print(f"Loading custom MedVigil model from {model_path}...")
+                self.tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=False)
+                self.model = AutoModelForTokenClassification.from_pretrained(model_path)
+            except Exception as e:
+                print(f"Error loading custom model: {e}. Falling back to base model.")
+                self.tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, use_fast=False)
+                self.model = AutoModelForTokenClassification.from_pretrained(BASE_MODEL)
         else:
             print(f"Warning: Custom model not found at {model_path}. Using base BioBERT (inference will be limited).")
-            self.tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL)
+            self.tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, use_fast=False)
             self.model = AutoModelForTokenClassification.from_pretrained(BASE_MODEL)
             
+        # Move model to GPU
+        if torch.cuda.is_available():
+            self.model.to("cuda")
+
+        # Tell pipeline to use GPU
         self.ner_pipeline = pipeline(
-            "ner", 
-            model=self.model, 
-            tokenizer=self.tokenizer, 
-            aggregation_strategy="simple"
+            "ner",
+            model=self.model,
+            tokenizer=self.tokenizer,
+            aggregation_strategy="simple",
+            device=self.device
         )
 
     def analyze_note(self, text):

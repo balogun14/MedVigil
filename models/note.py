@@ -6,3 +6,5 @@ class Note(SQLModel, table=True):
     text: str
     entities: List[Dict[str, Any]] = Field(default_factory=list, sa_type=JSON)
     status: str = Field(default="processed")
+    naranjo_score: Optional[int] = Field(default=None)
+    naranjo_classification: Optional[str] = Field(default=None)
