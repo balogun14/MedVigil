@@ -118,7 +118,7 @@ def train():
 
     training_args = TrainingArguments(
         output_dir=OUTPUT_DIR,
-        evaluation_strategy="epoch",
+        eval_strategy="epoch",
         learning_rate=2e-5,
         per_device_train_batch_size=16,
         per_device_eval_batch_size=16,
@@ -134,7 +134,7 @@ def train():
         args=training_args,
         train_dataset=train_data,
         eval_dataset=val_data,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         data_collator=DataCollatorForTokenClassification(tokenizer),
         compute_metrics=compute_metrics,
     )
