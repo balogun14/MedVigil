@@ -12,17 +12,25 @@ def prepare_ade_dataset():
     processed_records = []
     
     print(f"Processing {len(data)} records...")
+    print(data[0])
     for record in tqdm(data):
         # The dataset provides: sentence, drug, effect, and their spans
-        # We want to create a clean CSV for training
+        try:
+            drug_start = record['indexes']['drug']['start_char'][0]
+            drug_end = record['indexes']['drug']['end_char'][0]
+            effect_start = record['indexes']['effect']['start_char'][0]
+            effect_end = record['indexes']['effect']['end_char'][0]
+        except IndexError:
+            continue
+
         processed_records.append({
             'sentence': record['text'],
             'drug': record['drug'],
-            'drug_start': record['indexes']['drug']['start-char'][0],
-            'drug_end': record['indexes']['drug']['end-char'][0],
-            'effect': record['adverse_effect'],
-            'effect_start': record['indexes']['adverse_effect']['start-char'][0],
-            'effect_end': record['indexes']['adverse_effect']['end-char'][0]
+            'drug_start': drug_start,
+            'drug_end': drug_end,
+            'effect': record['effect'],
+            'effect_start': effect_start,
+            'effect_end': effect_end
         })
         
     df = pd.DataFrame(processed_records)

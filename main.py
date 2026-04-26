@@ -1,6 +1,14 @@
-def main():
-    print("Hello from medvigil!")
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
 
+from core.database import create_db_and_tables
+from api.routers import notes
 
-if __name__ == "__main__":
-    main()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    create_db_and_tables()
+    yield
+
+app = FastAPI(title="MedVigil API", lifespan=lifespan)
+
+app.include_router(notes.router)
