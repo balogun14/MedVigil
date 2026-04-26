@@ -55,11 +55,15 @@ class MedVigilBrain:
         return results
 
     def _deidentify(self, text):
-        # Basic example: Strip anything that looks like a phone number or name-like patterns
+        # Basic example: Strip anything that looks like a phone number, date, or name-like patterns
         # This will be expanded in the privacy-guard module.
         import re
         # Simple phone number mask
         text = re.sub(r'\d{3}-\d{3}-\d{4}', '[PHONE]', text)
+        # Simple date mask (YYYY-MM-DD)
+        text = re.sub(r'\d{4}-\d{2}-\d{2}', '[DATE]', text)
+        # Simple name mask (Assuming "Patient First Last")
+        text = re.sub(r'(?<=Patient )[A-Z][a-z]+ [A-Z][a-z]+', '[NAME]', text)
         return text
 
 if __name__ == "__main__":
